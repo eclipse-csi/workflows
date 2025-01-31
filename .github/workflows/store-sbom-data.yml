@@ -37,6 +37,21 @@ jobs:
       - name: "Generate metadata"
         shell: bash
         run: |
+          if [ -z "${{ inputs.projectName }}" ]; then
+            echo "projectName is empty"
+            exit 1
+          fi
+
+          if [ -z "${{ inputs.projectVersion }}" ]; then
+            echo "projectVersion is empty"
+            exit 1
+          fi
+
+          if [ -z "${{ inputs.parentProject }}" ]; then
+            echo "parentProject is empty"
+            exit 1
+          fi
+          
           echo "$(cat <<EOT
           {
             "projectName": "${{ inputs.projectName }}",
@@ -51,7 +66,9 @@ jobs:
             exit 1
           fi
 
-          cp ${{ inputs.bomFilename }} bom.json
+          if [[ "${{ inputs.bomFilename }}" != "bom.json" ]]; then 
+            cp ${{ inputs.bomFilename }} bom.json
+          fi
 
       - name: Upload sbom metadata
         uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
