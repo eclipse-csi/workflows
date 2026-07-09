@@ -1,0 +1,56 @@
+name: Upload SBOM
+description: Upload SBOM to DependencyTrack via PIA
+
+inputs:
+  sbom-file:
+    description: Path to the SBOM JSON file
+    required: true
+  product-name:
+    description: Product name as shown on DependencyTrack (e.g. "openvsx-server" or "openvsx-webui")
+    required: true
+  product-version:
+    description: Product version as shown on DependencyTrack
+    required: true
+  staging:
+    description: Pass 'true' to upload to the staging instance instead of production
+    required: false
+    default: 'false'
+
+runs:
+  using: composite
+  steps:
+    - name: Upload SBOM
+      shell: bash
+      env:
+        # Pass inputs via env to prevent shell injection.
+        STAGING: ${{ inputs.staging }}
+        SBOM_FILE: ${{ inputs.sbom-file }}
+        PRODUCT_NAME: ${{ inputs.product-name }}
+        PRODUCT_VERSION: ${{ inputs.product-version }}
+      run: |
+        set -euo pipefail
+
+        case "$STAGING" in
+          true)  PIA_DOMAIN=pia-staging.eclipse.org ;;
+          false) PIA_DOMAIN=pia.eclipse.org ;;
+          *) echo "::error::staging must be 'true' or 'false', got: $STAGING" >&2; exit 1 ;;
+        esac
+
+        echo "Upload SBOM for $PRODUCT_NAME $PRODUCT_VERSION to $PIA_DOMAIN"
+
+        # Get OIDC token from GitHub Identity Provider
+        ID_TOKEN=$(curl -sS -H "Authorization: bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" \
+          "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${PIA_DOMAIN}" | jq -r '.value')
+
+        # Build JSON payload and upload to PIA
+        # Use jq --arg for proper JSON escaping of untrusted inputs,
+        # and --rawfile to read the large base64 bom from a file
+        # (passing it as --arg would exceed the argument list limit).
+        base64 -w0 "$SBOM_FILE" > bom.b64
+        jq -n --arg name "$PRODUCT_NAME" \
+              --arg version "$PRODUCT_VERSION" \
+              --rawfile bom bom.b64 \
+              '{product_name: $name, product_version: $version, bom: $bom}' | \
+        curl -sS --fail-with-body "https://${PIA_DOMAIN}/v1/upload/sbom" \
+          -H "Authorization: Bearer ${ID_TOKEN}" \
+          --json @-
