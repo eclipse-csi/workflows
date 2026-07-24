@@ -6,8 +6,15 @@ Collection of reusable workflows and actions.
 A composite action for authenticated SBOM upload to the Eclipse Foundation
 DependencyTrack instance.
 
+### Prerequisite
+
 Before using this action, please request upload permission for your GitHub
-repository from the [Eclipse Foundation Security Team](https://www.eclipse.org/security/.
+repository and the `product-name` you want to use from the [Eclipse Foundation
+Security Team](https://www.eclipse.org/security/).
+
+> [!IMPORTANT]
+> Upload permission is granted for a `product-name`. If you want to change
+> `product-name`, you must re-request permission.
 
 ### Usage
 
