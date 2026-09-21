@@ -43,6 +43,8 @@ runs:
           "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${PIA_DOMAIN}" | jq -r '.value')
 
         # Build JSON payload and upload to PIA
+        # Set headers explicitly and pass the payload with --data-binary,
+        # instead of using the --json shorthand, which requires curl >= 7.82.0.
         # Use jq --arg for proper JSON escaping of untrusted inputs,
         # and --rawfile to read the large base64 bom from a file
         # (passing it as --arg would exceed the argument list limit).
@@ -53,4 +55,6 @@ runs:
               '{product_name: $name, product_version: $version, bom: $bom}' | \
         curl -sS --fail-with-body "https://${PIA_DOMAIN}/v1/upload/sbom" \
           -H "Authorization: Bearer ${ID_TOKEN}" \
-          --json @-
+          -H "Content-Type: application/json" \
+          -H "Accept: application/json" \
+          --data-binary @-
