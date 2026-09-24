@@ -4,7 +4,7 @@ Collection of reusable workflows and actions.
 ## upload-sbom
 
 A composite action for authenticated SBOM upload to the Eclipse Foundation
-DependencyTrack instance.
+DependencyTrack instance at https://sbom.eclipse.org.
 
 ### Prerequisite
 
@@ -35,15 +35,4 @@ permissions:
     sbom-file: 'path/to/openvsx-server-sbom.json'
     product-name: 'openvsx-server'
     product-version: 'v1.0.0'
-```
-
-#### Example (staging)
-
-```yaml
-- uses: eclipse-csi/workflows/upload-sbom@<pin to sha!>
-  with:
-    sbom-file: 'path/to/openvsx-server-sbom.json'
-    product-name: 'openvsx-server'
-    product-version: 'v1.0.0'
-    staging: true
 ```
