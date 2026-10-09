@@ -30,6 +30,10 @@ runs:
       run: |
         set -euo pipefail
 
+        [ -n "$SBOM_FILE" ] || { echo "::error::sbom-file must not be empty" >&2; exit 1; }
+        [ -n "$PRODUCT_NAME" ] || { echo "::error::product-name must not be empty" >&2; exit 1; }
+        [ -n "$PRODUCT_VERSION" ] || { echo "::error::product-version must not be empty" >&2; exit 1; }
+
         case "$STAGING" in
           true)  PIA_DOMAIN=pia-staging.eclipse.org ;;
           false) PIA_DOMAIN=pia.eclipse.org ;;
