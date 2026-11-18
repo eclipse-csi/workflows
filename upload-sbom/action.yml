@@ -11,8 +11,10 @@ inputs:
   product-version:
     description: Product version as shown on DependencyTrack
     required: true
+  # Internal option for testing against the PIA staging instance.
+  # NOT part of the public API: it may change or be removed at any time.
   staging:
-    description: Pass 'true' to upload to the staging instance instead of production
+    description: "(non-public API) pass 'true' to upload to the staging instance instead of production"
     required: false
     default: 'false'
 
